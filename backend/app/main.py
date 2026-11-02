@@ -14,9 +14,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Создание таблиц (для удобства разработки)
-Base.metadata.create_all(bind=engine)
-
 app = FastAPI(title="Obshchaga Fridge DAC API", version="1.0.0")
 
 @app.post("/api/register", status_code=status.HTTP_201_CREATED)
