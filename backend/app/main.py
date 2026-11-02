@@ -1,11 +1,13 @@
 import logging
 from fastapi import FastAPI, Depends, HTTPException, status, Header
 from sqlalchemy.orm import Session
+from contextlib import asynccontextmanager
 
 from app.database import engine, Base, get_db
 from app.models import User, Resource, ResourcePermission
 from app.schemas import UserCreate, ResourceCreate, ResourceUpdate, PermissionUpdate
 from app.core.security import get_password_hash
+from app import models
 
 # Настройка структурированного логирования
 logging.basicConfig(
@@ -14,7 +16,14 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-app = FastAPI(title="Obshchaga Fridge DAC API", version="1.0.0")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Создаем таблицы в БД при старте приложения (если их еще нет)
+    Base.metadata.create_all(bind=engine)
+    yield
+    # Здесь можно прописать действия при выключении, если понадобятся
+
+app = FastAPI(title="Obshchaga Fridge DAC API", version="1.0.0", lifespan=lifespan)
 
 @app.post("/api/register", status_code=status.HTTP_201_CREATED)
 def register_user(user_in: UserCreate, db: Session = Depends(get_db)):

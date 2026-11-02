@@ -1,6 +1,10 @@
 import os
+from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
+
+# Загружаем переменные из файла .env
+load_dotenv()
 
 # Читаем URL из переменной окружения (ее передаст Docker Compose)
 DATABASE_URL = os.getenv(
