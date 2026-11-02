@@ -23,6 +23,7 @@ class Resource(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     title: Mapped[str] = mapped_column(String(100), nullable=False)  # Например, "Пицца Пепперони"
     description: Mapped[str] = mapped_column(Text, default="")         # Описание / статус (например, "осталось 8 кусков")
+    expires_at: Mapped[str] = mapped_column(String(100), default="Свежее") # Срок годности
     
     owner_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)

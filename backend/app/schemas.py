@@ -33,3 +33,19 @@ class UserResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+class ResourceCreate(BaseModel):
+    title: str = Field(..., min_length=1, max_length=100)  # Например, "Пицца Пепперони"
+    description: str = Field(default="")                     # Описание / статус (например, "8 кусков")
+    expires_at: str = Field(default="Свежее (до конца недели)") # Срок годности
+
+class ResourceUpdate(BaseModel):
+    title: str | None = None
+    description: str | None = None
+    expires_at: str | None = None
+
+class PermissionUpdate(BaseModel):
+    target_user_id: int
+    can_read: bool = False    # Изучить этикетку / проверить срок годности (Read)
+    can_update: bool = False  # Откусить / переставить / подсыпать снотворное (Update)
+    can_delete: bool = False  # Схомячить полностью / выбросить просрочку (Delete)
