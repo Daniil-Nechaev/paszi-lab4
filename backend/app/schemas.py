@@ -19,12 +19,14 @@ class UserCreate(BaseModel):
         return v
 
 class ResourceCreate(BaseModel):
-    name: str = Field(..., min_length=1, max_length=64)
+    title: str = Field(..., min_length=1, max_length=100)
     description: str = Field(default="")
+    expires_at: str = Field(default="")
 
 class ResourceUpdate(BaseModel):
-    name: str | None = Field(default=None, min_length=1, max_length=64)
+    title: str | None = Field(default=None, min_length=1, max_length=100)
     description: str | None = None
+    expires_at: str | None = None
 
 class PermissionUpdate(BaseModel):
     target_user_id: int
