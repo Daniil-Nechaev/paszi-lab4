@@ -1,28 +1,40 @@
-version: '3.8'
-
 services:
   db:
     image: postgres:15-alpine
-    container_name: fridge_postgres
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: fridge
+      POSTGRES_PASSWORD: fridge_pass
       POSTGRES_DB: fridge_db
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      # Проверка, что база готова принимать подключения
+      test: ["CMD-SHELL", "pg_isready -U fridge -d fridge_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   backend:
     build: ./backend
-    container_name: fridge_backend
-    restart: always
     ports:
       - "8000:8000"
     environment:
-      - DATABASE_URL=postgresql://postgres:postgres@db:5432/fridge_db
+      - DATABASE_URL=postgresql+psycopg2://fridge:fridge_pass@db:5432/fridge_db
+      - SECRET_KEY=dev_secret_change_me
+      - APP_ENV=development
     depends_on:
-      - db
+      db:
+        condition: service_healthy # Бэкенд запустится только когда БД будет готова
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
 
 volumes:
+  # Чтобы данные в БД не удалялись при перезапуске контейнеров
   postgres_data:
