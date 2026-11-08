@@ -24,9 +24,9 @@ export const authApi = {
 
 export const resourceApi = {
   getResources: () => api.get('/api/resources'),
-  createResource: (data: { name: string; description: string }) =>
+  createResource: (data: { title: string; description: string; expires_at: string }) =>
     api.post('/api/resources', data),
-  updateResource: (id: number, data: { name?: string; description?: string }) =>
+  updateResource: (id: number, data: { title?: string; description?: string; expires_at?: string }) =>
     api.put(`/api/resources/${id}`, data),
   deleteResource: (id: number) => api.delete(`/api/resources/${id}`),
   setPermissions: (resourceId: number, targetUserId: number, permissions: { can_read: boolean; can_update: boolean; can_delete: boolean }) =>

@@ -6,8 +6,9 @@ export default function FridgePage({ userId }: { userId: number }) {
   const [resources, setResources] = useState<any[]>([]);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [newName, setNewName] = useState('');
+  const [newTitle, setNewTitle] = useState('');
   const [newDesc, setNewDesc] = useState('');
+  const [newExpires, setNewExpires] = useState('');
   const [showPermModal, setShowPermModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [targetResourceId, setTargetResourceId] = useState<number | null>(null);
@@ -15,8 +16,9 @@ export default function FridgePage({ userId }: { userId: number }) {
   const [permRead, setPermRead] = useState(false);
   const [permUpdate, setPermUpdate] = useState(false);
   const [permDelete, setPermDelete] = useState(false);
-  const [editName, setEditName] = useState('');
+  const [editTitle, setEditTitle] = useState('');
   const [editDesc, setEditDesc] = useState('');
+  const [editExpires, setEditExpires] = useState('');
   const navigate = useNavigate();
 
   const loadResources = async () => {
@@ -43,10 +45,11 @@ export default function FridgePage({ userId }: { userId: number }) {
   const handleAddResource = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await resourceApi.createResource({ name: newName, description: newDesc });
+      await resourceApi.createResource({ title: newTitle, description: newDesc, expires_at: newExpires });
       setSuccess('Продукт добавлен!');
-      setNewName('');
+      setNewTitle('');
       setNewDesc('');
+      setNewExpires('');
       loadResources();
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Ошибка при добавлении');
@@ -55,15 +58,16 @@ export default function FridgePage({ userId }: { userId: number }) {
 
   const openEditModal = (res: any) => {
     setTargetResourceId(res.id);
-    setEditName(res.name);
+    setEditTitle(res.title);
     setEditDesc(res.description);
+    setEditExpires(res.expires_at || '');
     setShowEditModal(true);
   };
 
   const handleSaveEdit = async () => {
     if (!targetResourceId) return;
     try {
-      await resourceApi.updateResource(targetResourceId, { name: editName, description: editDesc });
+      await resourceApi.updateResource(targetResourceId, { title: editTitle, description: editDesc, expires_at: editExpires });
       setSuccess('Продукт изменён!');
       setShowEditModal(false);
       loadResources();
@@ -127,8 +131,9 @@ export default function FridgePage({ userId }: { userId: number }) {
       <div style={{ border: '1px solid #ddd', padding: '15px', borderRadius: '8px', marginBottom: '20px' }}>
         <h3>Положить продукт в холодильник</h3>
         <form onSubmit={handleAddResource} style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-          <input placeholder="Название (напр. Пицца)" value={newName} onChange={(e) => setNewName(e.target.value)} required style={{ padding: '8px', flex: '1', minWidth: '150px' }} />
+          <input placeholder="Название (напр. Пицца)" value={newTitle} onChange={(e) => setNewTitle(e.target.value)} required style={{ padding: '8px', flex: '1', minWidth: '150px' }} />
           <input placeholder="Описание (напр. 4 куска)" value={newDesc} onChange={(e) => setNewDesc(e.target.value)} required style={{ padding: '8px', flex: '1', minWidth: '150px' }} />
+          <input placeholder="Срок (напр. До завтра)" value={newExpires} onChange={(e) => setNewExpires(e.target.value)} style={{ padding: '8px', flex: '1', minWidth: '150px' }} />
           <button type="submit" style={{ padding: '8px 16px', background: '#863bff', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Добавить</button>
         </form>
       </div>
@@ -142,9 +147,9 @@ export default function FridgePage({ userId }: { userId: number }) {
             <div key={res.id} style={{ border: '1px solid #ccc', padding: '15px', borderRadius: '8px', background: res.is_owner ? '#f0fdf4' : '#fff' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
                 <div style={{ flex: '1', minWidth: '200px' }}>
-                  <h4 style={{ margin: '0 0 5px 0' }}>{res.name} {res.is_owner && '👑 (Твоё)'}</h4>
+                  <h4 style={{ margin: '0 0 5px 0' }}>{res.title} {res.is_owner && '👑 (Твоё)'}</h4>
                   <p style={{ margin: '0 0 5px 0', color: '#555' }}>{res.description}</p>
-                  <small style={{ color: '#888' }}>Владелец ID: {res.owner_id}</small>
+                  <small style={{ color: '#888' }}>Срок: {res.expires_at || 'не указан'} | Владелец ID: {res.owner_id}</small>
                 </div>
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                   {res.is_owner && (
@@ -169,11 +174,15 @@ export default function FridgePage({ userId }: { userId: number }) {
             <h3>✏️ Изменить продукт</h3>
             <label style={{ display: 'block', marginBottom: '10px' }}>
               Название:
-              <input type="text" value={editName} onChange={(e) => setEditName(e.target.value)} style={{ width: '100%', padding: '8px', marginTop: '5px' }} />
+              <input type="text" value={editTitle} onChange={(e) => setEditTitle(e.target.value)} style={{ width: '100%', padding: '8px', marginTop: '5px' }} />
             </label>
-            <label style={{ display: 'block', marginBottom: '15px' }}>
+            <label style={{ display: 'block', marginBottom: '10px' }}>
               Описание:
               <input type="text" value={editDesc} onChange={(e) => setEditDesc(e.target.value)} style={{ width: '100%', padding: '8px', marginTop: '5px' }} />
+            </label>
+            <label style={{ display: 'block', marginBottom: '15px' }}>
+              Срок годности:
+              <input type="text" value={editExpires} onChange={(e) => setEditExpires(e.target.value)} style={{ width: '100%', padding: '8px', marginTop: '5px' }} />
             </label>
             <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
               <button onClick={() => setShowEditModal(false)} style={{ padding: '8px 12px', cursor: 'pointer' }}>Отмена</button>
