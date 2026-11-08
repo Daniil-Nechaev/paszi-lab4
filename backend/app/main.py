@@ -54,11 +54,11 @@ def get_current_user_id(x_user_id: int = Header(..., description="ID текущ�
 
 @app.post("/api/resources", status_code=status.HTTP_201_CREATED)
 def create_resource(res_in: ResourceCreate, user_id: int = Depends(get_current_user_id), db: Session = Depends(get_db)):
-    new_resource = Resource(name=res_in.name, description=res_in.description, owner_id=user_id)
+    new_resource = Resource(title=res_in.title, description=res_in.description, expires_at=res_in.expires_at, owner_id=user_id)
     db.add(new_resource)
     db.commit()
     db.refresh(new_resource)
-    return {"id": new_resource.id, "name": new_resource.name, "description": new_resource.description, "owner_id": new_resource.owner_id}
+    return {"id": new_resource.id, "title": new_resource.title, "description": new_resource.description, "expires_at": new_resource.expires_at, "owner_id": new_resource.owner_id}
 
 @app.get("/api/resources")
 def get_resources(user_id: int = Depends(get_current_user_id), db: Session = Depends(get_db)):
@@ -80,8 +80,9 @@ def get_resources(user_id: int = Depends(get_current_user_id), db: Session = Dep
             ).first()
         result.append({
             "id": r.id,
-            "name": r.name,
+            "title": r.title,
             "description": r.description,
+            "expires_at": r.expires_at,
             "owner_id": r.owner_id,
             "is_owner": is_owner,
             "can_update": is_owner or (perm.can_update if perm else False),
@@ -98,7 +99,7 @@ def get_resource_detail(resource_id: int, user_id: int = Depends(get_current_use
         perm = db.query(ResourcePermission).filter(ResourcePermission.resource_id == resource_id, ResourcePermission.user_id == user_id).first()
         if not perm or not perm.can_read:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="🚫 Не трогай, это не твое!")
-    return {"id": resource.id, "name": resource.name, "description": resource.description, "owner_id": resource.owner_id}
+    return {"id": resource.id, "title": resource.title, "description": resource.description, "expires_at": resource.expires_at, "owner_id": resource.owner_id}
 
 @app.put("/api/resources/{resource_id}")
 def update_resource(resource_id: int, res_in: ResourceUpdate, user_id: int = Depends(get_current_user_id), db: Session = Depends(get_db)):
@@ -109,8 +110,9 @@ def update_resource(resource_id: int, res_in: ResourceUpdate, user_id: int = Dep
         perm = db.query(ResourcePermission).filter(ResourcePermission.resource_id == resource_id, ResourcePermission.user_id == user_id).first()
         if not perm or not perm.can_update:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="🚫 Руки прочь! Нет права can_update")
-    if res_in.name is not None: resource.name = res_in.name
+    if res_in.title is not None: resource.title = res_in.title
     if res_in.description is not None: resource.description = res_in.description
+    if res_in.expires_at is not None: resource.expires_at = res_in.expires_at
     db.commit()
     return {"message": "Продукт успешно изменён!"}
 
