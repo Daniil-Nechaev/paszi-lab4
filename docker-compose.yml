@@ -2,9 +2,14 @@ services:
   db:
     image: postgres:15-alpine
     environment:
-      POSTGRES_USER: fridge
-      POSTGRES_PASSWORD: fridge_pass
-      POSTGRES_DB: fridge_db
+      - DATABASE_URL=${DATABASE_URL}
+      - SECRET_KEY=${SECRET_KEY}
+      - APP_ENV=${APP_ENV}
+      - HASH_SCHEME=${HASH_SCHEME}
+      - PORT=${PORT}
+      - ARGON2_TIME_COST=${ARGON2_TIME_COST}
+      - ARGON2_MEMORY_COST=${ARGON2_MEMORY_COST}
+      - ARGON2_PARALLELISM=${ARGON2_PARALLELISM}
     ports:
       - "5432:5432"
     volumes:

@@ -44,7 +44,8 @@ def test_register_success():
         json={"login": "student1", "password": "StrongPassword1!"}
     )
     assert response.status_code == 201
-    assert response.json() == {"message": "user создан"}
+    assert response.json()["login"] == "student1"
+    assert "id" in response.json()
 
 
 def test_register_duplicate_login():
@@ -120,4 +121,4 @@ def test_dac_denied_delete_access():
     
     # Ожидаем отказ (403 Forbidden)[cite: 6]
     assert delete_res.status_code == 403
-    assert "Нельзя доедать" in delete_res.json()["detail"]
+    assert "Нельзя удалять чужую еду" in delete_res.json()["detail"]
