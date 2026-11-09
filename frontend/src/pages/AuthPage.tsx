@@ -30,7 +30,20 @@ export default function AuthPage({ onLogin }: AuthPageProps) {
       navigate('/fridge');
     } catch (err: any) {
       const detail = err.response?.data?.detail;
-      setError(detail || 'Ошибка');
+      
+      if (Array.isArray(detail)) {
+        // Берем текст ошибки
+        let errorMessage = detail[0]?.msg || 'Ошибка валидации данных';
+        
+        // Отрезаем английский префикс "Value error, " если он есть
+        if (errorMessage.startsWith('Value error, ')) {
+          errorMessage = errorMessage.replace('Value error, ', '');
+        }
+        
+        setError(errorMessage);
+      } else {
+        setError(detail || 'Произошла неизвестная ошибка');
+      }
     } finally {
       setLoading(false);
     }
